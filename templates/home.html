@@ -1,0 +1,11 @@
+<!-- templates/home.html -->
+{% extends "base.html" %}
+{% block content %}
+  <div class="jumbotron">
+    <h1 class="display-4">Welcome to Green Marketplace!</h1>
+    <p class="lead">Your one-stop platform for eco-friendly shopping.</p>
+    <hr class="my-4">
+    <p>Explore our wide range of environmentally sustainable products.</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'product_list' %}" role="button">Start Shopping</a>
+  </div>
+{% endblock %}

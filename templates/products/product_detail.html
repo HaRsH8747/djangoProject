@@ -1,0 +1,31 @@
+<!-- templates/products/product_detail.html -->
+{% extends "base.html" %}
+{% block content %}
+    <h2>{{ product.name }}</h2>
+    <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-width: 100%;">
+    <p>{{ product.description }}</p>
+    <p>Price: {{ product.price }}</p>
+    <p>Category: {{ product.category.name }}</p>
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'add_to_cart' product.pk %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" id="quantity" class="form-control" value="1" min="1">
+            </div>
+            <button type="submit" class="btn btn-primary">Add to Cart</button>
+        </form>
+        <h3>Leave a review</h3>
+        <form method="post" action="{% url 'add_review' product.pk %}">
+            {% csrf_token %}
+            {{ review_form.as_p }}
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    {% endif %}
+    <h3>Reviews</h3>
+    <ul>
+        {% for review in product.reviews.all %}
+            <li>{{ review.user.username }} - {{ review.rating }} - {{ review.comment }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

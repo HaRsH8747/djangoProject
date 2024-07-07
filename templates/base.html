@@ -1,0 +1,130 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Green Marketplace</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #suggestions {
+            top: 100%;
+            display: none;
+            position: absolute;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #suggestions div {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #suggestions div:hover {
+            background-color: #e9ecef;
+        }
+
+        .search-container {
+            position: relative;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="{% url 'home' %}">Green Marketplace</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'product_list' %}">Products</a>
+            </li>
+            {% if user.is_authenticated and user.userprofile.is_seller %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_product' %}">Add Product</a>
+                </li>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'view_cart' %}">Cart</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:profile' %}">Profile</a>
+                </li>
+            {% endif %}
+        </ul>
+        <div class="search-container">
+            <form class="form-inline my-2 my-lg-0" method="GET" action="{% url 'search_products' %}">
+                <input class="form-control mr-sm-2" type="search" name="q" id="search-bar"
+                       placeholder="Search products..."
+                       aria-label="Search">
+                <div id="suggestions"></div>
+            </form>
+        </div>
+        <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+<div class="container mt-4">
+    {% block content %}
+    {% endblock %}
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    document.getElementById('search-bar').addEventListener('input', function () {
+        let query = this.value;
+        if (query.length > 2) {
+            fetch(`/products/search_suggestions/?q=${query}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    let suggestions = document.getElementById('suggestions');
+                    suggestions.innerHTML = '';
+                    let products = data.products;
+                    if (products.length > 0) {
+                        suggestions.style.display = 'block';
+                        products.forEach(product => {
+                            let div = document.createElement('div');
+                            div.textContent = `${product.name} - $${product.price}`;
+                            div.addEventListener('click', function () {
+                                document.getElementById('search-bar').value = product.name;
+                                suggestions.style.display = 'none';
+                            });
+                            suggestions.appendChild(div);
+                        });
+                    } else {
+                        suggestions.style.display = 'none';
+                    }
+                });
+        } else {
+            document.getElementById('suggestions').style.display = 'none';
+        }
+    });
+</script>
+</body>
+</html>
