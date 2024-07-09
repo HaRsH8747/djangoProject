@@ -43,13 +43,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "accounts.apps.AccountsConfig",
     "products.apps.ProductsConfig",
-    "cart.apps.CartConfig"
+    "cart.apps.CartConfig",
+    "search.apps.SearchConfig",
+    "Messaging.apps.MessagingConfig"
 ]
-
-# if DEBUG:
-#     from django.conf.urls.static import static
-#     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

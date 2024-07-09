@@ -5,7 +5,6 @@ from products.models import Product
 
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
     def __str__(self):
         return f'Cart for {self.user.username}'
 
