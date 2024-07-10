@@ -1,130 +1,45 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Green Marketplace</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        #suggestions {
-            top: 100%;
-            display: none;
-            position: absolute;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            background-color: white;
-            border: 1px solid #ccc;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        #suggestions div {
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        #suggestions div:hover {
-            background-color: #e9ecef;
-        }
-
-        .search-container {
-            position: relative;
-            display: inline-block;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ecommerce Website{% endblock %}</title>
+    <link rel="icon" href="">
+    <!-- Link CSS  -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Link Tailwind CSS  -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="{% url 'home' %}">Green Marketplace</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'home' %}">Home</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'product_list' %}">Products</a>
-            </li>
-            {% if user.is_authenticated and user.userprofile.is_seller %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'add_product' %}">Add Product</a>
-                </li>
-            {% endif %}
-            {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'view_cart' %}">Cart</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'accounts:profile' %}">Profile</a>
-                </li>
-            {% endif %}
-        </ul>
-        <div class="search-container">
-            <form class="form-inline my-2 my-lg-0" method="GET" action="{% url 'search_products' %}">
-                <input class="form-control mr-sm-2" type="search" name="q" id="search-bar"
-                       placeholder="Search products..."
-                       aria-label="Search">
-                <div id="suggestions"></div>
-            </form>
-        </div>
-        <ul class="navbar-nav">
-            {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
-                </li>
-            {% endif %}
-        </ul>
+<!-- Navbar Design  -->
+<header class="text-gray-600 body-font">
+    <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+        <a class="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0">
+            <span class="ml-3 text-xl"><img src="" class="cursor-pointer"></span>
+        </a>
+        <nav class="md:ml-auto md:mr-auto flex flex-wrap items-center text-base justify-center">
+            <a href="{% url 'home' %}"
+               class="mr-10 text-lime-600 font-semibold cursor-pointer hover:text-lime-500 text-lg">Home</a>
+            <a href="{% url 'product_list' %}"
+               class="mr-10 text-lime-600 font-semibold cursor-pointer hover:text-lime-500 text-lg">Products</a>
+            <a href="#reviews" class="mr-10 text-lime-600 font-semibold cursor-pointer hover:text-lime-500 text-lg">Reviews</a>
+            <a href="#pricing" class="mr-10 text-lime-600 font-semibold cursor-pointer hover:text-lime-500 text-lg">Pricing</a>
+            <a href="#contact" class="mr-10 text-lime-600 font-semibold cursor-pointer hover:text-lime-500 text-lg">Contact</a>
+        </nav>
+        <button class="inline-flex items-center bg-lime-700 border-0 py-2 px-8 focus:outline-none hover:bg-lime-600 rounded text-base mt-4 md:mt-0 text-white text-12xl">
+            Enroll Now
+            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                 class="w-4 h-4 ml-1" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"></path>
+            </svg>
+        </button>
     </div>
-</nav>
-<div class="container mt-4">
-    {% block content %}
-    {% endblock %}
-</div>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script>
-    document.getElementById('search-bar').addEventListener('input', function () {
-        let query = this.value;
-        if (query.length > 2) {
-            fetch(`/products/search_suggestions/?q=${query}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    let suggestions = document.getElementById('suggestions');
-                    suggestions.innerHTML = '';
-                    let products = data.products;
-                    if (products.length > 0) {
-                        suggestions.style.display = 'block';
-                        products.forEach(product => {
-                            let div = document.createElement('div');
-                            div.textContent = `${product.name} - $${product.price}`;
-                            div.addEventListener('click', function () {
-                                document.getElementById('search-bar').value = product.name;
-                                suggestions.style.display = 'none';
-                            });
-                            suggestions.appendChild(div);
-                        });
-                    } else {
-                        suggestions.style.display = 'none';
-                    }
-                });
-        } else {
-            document.getElementById('suggestions').style.display = 'none';
-        }
-    });
-</script>
+</header>
+{% block content %}{% endblock %}
+<!-- JS Link  -->
+<script src="{% static 'script.js' %}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>
